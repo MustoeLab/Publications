@@ -8,6 +8,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plot
+import matplotlib.ticker as ticker
 import sys
 import RNAtools2 as RNAtools
 import numpy as np
@@ -197,43 +198,50 @@ while j < loopend:                 # Start of the while loop
         grand_mutrate_list.append(mutratetotal)
         grand_mutrate_error_list.append(mutrateerror)
 
-    xtiks = (1,1.1,1.2)
-    labels = ('Unbuffered', 'pH 7.2', 'pH 8')
+
+    xtiks = (1, 1.1, 1.2)
 
     # Define color dictionary #
-    colorA = {'A' : 'blue', 'C' : 'limegreen', 'G' : 'orange', 'U' : 'violet'}
-    colorB = {'A' : 'navy', 'C' : 'darkgreen', 'G' : 'darkorange', 'U' : 'purple'}
-
+    colorA = {'A' : 'xkcd:chocolate', 'C' : 'sienna', 'G' : 'red', 'U' : 'xkcd:peach'}
+    
     ## Creating Plots ##
-    names = ('AUC', 'Mutation Rate')
+    names = ('Mutation Rate', 'AUROC')
     fig, ax = plot.subplots(2,1, figsize=(3,4))
     plot.rc('xtick', labelsize=10)
     plot.rc('ytick', labelsize=10)
 
     for z, ztype in enumerate(names):
         for w, wtype in enumerate(ntlist):
-            if ztype == 'AUC':
-                data_use = grand_auc_list[w]
-                error_use = grand_auc_error_list[w]
-                ylimrange = (0.38, 1.02)
-                yscale_use = 'linear'
-                coloruseA = colorA.get(wtype)
-                coloruseB = colorB.get(wtype)
-            elif ztype == 'Mutation Rate':
+            if ztype == 'Mutation Rate':
                 data_use = grand_mutrate_list[w]
                 error_use = grand_mutrate_error_list[w]
                 ylimrange = (0.0001, 0.1)
                 yscale_use = 'log'
                 coloruseA = colorA.get(wtype)
-                coloruseB = colorB.get(wtype)
-
+            elif ztype == 'AUROC':
+                data_use = grand_auc_list[w]
+                error_use = grand_auc_error_list[w]
+                ylimrange = (0.38, 1.02)
+                yscale_use = 'linear'
+                coloruseA = colorA.get(wtype)
             ax[z].plot(xtiks, data_use, 'o', ms = 8 , mec = coloruseA, mfc = 'None', ls = '-', label = nt)
-            ax[z].errorbar(xtiks, data_use, yerr=error_use, color=coloruseA, ecolor=coloruseB, elinewidth=0)
+            ax[z].errorbar(xtiks, data_use, yerr=error_use, color=coloruseA, ecolor=coloruseA, elinewidth=0)
             ax[z].set_ylim(ylimrange)
             ax[z].set_ylabel(ztype)
             ax[z].set_yscale(yscale_use)
+            ax[z].xaxis.set_major_locator(ticker.NullLocator())
 
-    plot.suptitle(atext3[1])
+
+    data_use = (.00355, .00329, .00274)
+    ylimrange = (0.0001, 0.1)
+    yscale_use = 'log'
+    ax[0].plot(xtiks, data_use, 'o', ms = 8 , color= 'gray', mec = 'gray', mfc = 'None', ls = '--')
+    ax[0].set_ylim(ylimrange)
+    ax[0].set_ylabel('Mutation Rate')
+    ax[0].set_yscale(yscale_use)
+
+    ## Note: X-axis labels is Unbuffered, pH 7, pH 8 ##
+
     plot.tight_layout()
 
     ## Creating Output PDF File ##
